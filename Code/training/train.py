@@ -1,15 +1,20 @@
-from sklearn.decomposition.pca import PCA
-from sklearn.metrics import precision_score, classification_report, accuracy_score
-from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import MLPClassifier
-from lightgbm import LGBMClassifier
-from sklearn.pipeline import make_pipeline
-from sklearn.svm import SVC
-import logging
 import joblib
+import logging
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import make_pipeline
+from lightgbm import LGBMClassifier
+from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.decomposition.pca import PCA
 import sys
-sys.path.append("..")
+import os
+
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(
+    os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 from preprocessing.preprocess import import_xy
+
 
 MODEL_PATH = "../../Data/models/latest_model.pkl"
 
@@ -20,23 +25,21 @@ def train_model():
     X_test /= 255.0
 
     # model = SVC(kernel='linear')
-    # model = make_pipeline(PCA(200),
-    #                      LGBMClassifier(silent=False, random_state=42))
-    model = MLPClassifier((128, 64, 8), verbose=1)
+    model = make_pipeline(PCA(50), LogisticRegressionCV())
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    precision = accuracy_score(y_test, y_pred, average='weighted')
-    print(classification_report(y_test, y_pred))
-    return model, precision
+    accuracy = accuracy_score(y_test, y_pred)
+    print("\n", classification_report(y_test, y_pred))
+    return model, accuracy
 
 
-def save_model(model, precision, model_path=MODEL_PATH):
+def save_model(model, metric, model_path=MODEL_PATH):
 
-    print(precision)
+    print(round(metric, 2))
     joblib.dump(model, model_path)
 
 
 if __name__ == "__main__":
-    model, precision = train_model()
-    save_model(model, precision)
+    model, accuracy = train_model()
+    save_model(model, accuracy)
     print("Success!")
