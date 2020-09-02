@@ -8,6 +8,7 @@ from sklearn.metrics import classification_report, accuracy_score
 from sklearn.decomposition.pca import PCA
 import sys
 import os
+import time
 
 PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(
@@ -25,12 +26,15 @@ def train_model():
     X_test /= 255.0
 
     # model = SVC(kernel='linear')
-    model = make_pipeline(PCA(50), LogisticRegressionCV())
+    model = make_pipeline(PCA(500),
+                          LGBMClassifier(random_state=33))
+    start_time = time.time()
     model.fit(X_train, y_train)
+    end_time = time.time()
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     print("\n", classification_report(y_test, y_pred))
-    return model, accuracy
+    return model, accuracy, (end_time-start_time)
 
 
 def save_model(model, metric, model_path=MODEL_PATH):
@@ -40,6 +44,7 @@ def save_model(model, metric, model_path=MODEL_PATH):
 
 
 if __name__ == "__main__":
-    model, accuracy = train_model()
+    model, accuracy, time_train = train_model()
+    print(time_train)
     save_model(model, accuracy)
     print("Success!")
