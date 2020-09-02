@@ -40,19 +40,21 @@ def csv2img(csv, path, is_train=True):
     else:
         print("Successfully created the directory %s" % full_path)
 
-    for i in range(len(csv)):
-        # csv.iloc[i, 1:].to_numpy() returns pixel values array
-        # for i'th imag excluding the label
-        # next step: reshape the array to original shape(28, 28)
-        # and add missing color channels
-        result = Image.fromarray(np.uint8(
-            np.stack(
-                np.rot90(
-                    csv.iloc[i, 1:].to_numpy().reshape((28, 28)))*3, axis=-1)))
-        # save the image:
-        result.save(f'{full_path}{str(i)}.png')
+    if not os.path.isdir(full_path):
+        for i in range(len(csv)):
+            # csv.iloc[i, 1:].to_numpy() returns pixel values array
+            # for i'th imag excluding the label
+            # next step: reshape the array to original shape(28, 28)
+            # and add missing color channels
+            result = Image.fromarray(np.uint8(
+                np.stack(
+                    np.rot90(
+                        csv.iloc[i, 1:].to_numpy().
+                        reshape((28, 28)))*3, axis=-1)))
+            # save the image:
+            result.save(f'{full_path}{str(i)}.png')
 
-    print(f'{len(csv)} images were created.')
+        print(f'{len(csv)} images were created.')
 
 
 def create_train_test(csv_train, csv_test, data_path=DATA_PATH):
@@ -101,9 +103,13 @@ def import_xy(
 
     # save corresponding labels and image names to .csv file:
     df_train[['img', 'label_text']].to_csv(
-        os.path.join(DATA_PATH, 'working/train_image_labels.csv'), index=False)
+        os.path.join(DATA_PATH,
+                     'working/train/train_image_labels.csv'), index=False)
+
     df_test[['img', 'label_text']].to_csv(
-        os.path.join(DATA_PATH, 'working/test_image_labels.csv'), index=False)
+        os.path.join(DATA_PATH,
+                     'working/test/test_image_labels.csv'), index=False)
+
     return X_train, y_train, X_test, y_test
 
 
