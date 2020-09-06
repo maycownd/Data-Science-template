@@ -32,15 +32,16 @@ def csv2img(csv, path, is_train=True):
         image_path = "working/train/"
     else:
         image_path = "working/test/"
+
     full_path = os.path.join(path, image_path)
+    if os.path.isdir(full_path):
+        return None
     try:
         os.makedirs(full_path)
     except OSError:
         print("Creation of the directory %s failed" % full_path)
     else:
         print("Successfully created the directory %s" % full_path)
-
-    if not os.path.isdir(full_path):
         for i in range(len(csv)):
             # csv.iloc[i, 1:].to_numpy() returns pixel values array
             # for i'th imag excluding the label
@@ -104,13 +105,15 @@ def import_xy(
     # save corresponding labels and image names to .csv file:
     df_train[['img', 'label_text']].to_csv(
         os.path.join(DATA_PATH,
-                     'working/train/train_image_labels.csv'), index=False)
+                     'working/train_image_labels.csv'), index=False)
 
     df_test[['img', 'label_text']].to_csv(
         os.path.join(DATA_PATH,
-                     'working/test/test_image_labels.csv'), index=False)
+                     'working/test_image_labels.csv'), index=False)
 
     return X_train, y_train, X_test, y_test
+
+
 
 
 if __name__ == "__main__":
